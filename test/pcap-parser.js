@@ -36,7 +36,7 @@ vows.describe('pcap-parser').addBatch({
         assert.isNotNull(packetHeader);
         assert.equal(packetHeader.timestampSeconds, 1254722767);
         assert.equal(packetHeader.timestampMicroseconds, 492060);
-        assert.equal(packetHeader.includedLength, 76);
+        assert.equal(packetHeader.capturedLength, 76);
         assert.equal(packetHeader.originalLength, 76);
       }
     },
@@ -66,7 +66,7 @@ vows.describe('pcap-parser').addBatch({
         assert.equal(packet.data.length, 76);
         assert.equal(packet.header.timestampSeconds, 1254722767);
         assert.equal(packet.header.timestampMicroseconds, 492060);
-        assert.equal(packet.header.includedLength, 76);
+        assert.equal(packet.header.capturedLength, 76);
         assert.equal(packet.header.originalLength, 76);
       }
     },

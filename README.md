@@ -51,7 +51,7 @@ event listener would look something like
     {
       timestampSeconds: 1254722767,
       timestampMicroseconds: 492060,
-      includedLength: 76,
+      capturedLength: 76,
       originalLength: 76
     }
 
@@ -69,7 +69,7 @@ the header fields and packet data.
       header: {
         timestampSeconds: 1254722767,
         timestampMicroseconds: 492060,
-        includedLength: 76,
+        capturedLength: 76,
         originalLength: 76
       },
 
