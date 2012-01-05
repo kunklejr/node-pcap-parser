@@ -49,7 +49,7 @@ vows.describe('pcap-parser').addBatch({
 
       'packet data buffer should not be empty': function(packetData) {
         assert.isNotNull(packetData);
-        assert.isTrue(packetData.length > 0);
+        assert.equal(packetData.length, 129);
       }
     },
 
@@ -83,7 +83,7 @@ vows.describe('pcap-parser').addBatch({
       topic: function(parser) {
         var count = 0;
 
-        parser.on('packet', function() {
+        parser.on('packet', function(packet) {
           count++;
         }).on('end', function() {
           this.callback(null, count);
@@ -92,8 +92,8 @@ vows.describe('pcap-parser').addBatch({
         parser.parse();
       },
 
-      'it should process 30 packets': function(count) {
-        assert.equal(count, 30);
+      'it should process 10151 packets': function(count) {
+        assert.equal(count, 10151);
       }
     }
   },
