@@ -6,7 +6,7 @@ var pcapp = require('../index.js');
 
 vows.describe('pcap-parser').addBatch({
   'given a readable stream of a pcap file': {
-    topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'test.pcap'))),
+    topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'smtp.pcap'))),
 
     'the parser should emit globalHeader events': {
       topic: function(parser) {
@@ -22,7 +22,7 @@ vows.describe('pcap-parser').addBatch({
         assert.equal(header.gmtOffset, 0);
         assert.equal(header.timestampAccuracy, 0);
         assert.equal(header.snapshotLength, 65535);
-        assert.equal(header.linkLayerType, 127);
+        assert.equal(header.linkLayerType, 1);
       }
     },
 
@@ -34,10 +34,10 @@ vows.describe('pcap-parser').addBatch({
 
       'packet header values should be correct': function(packetHeader) {
         assert.isNotNull(packetHeader);
-        assert.equal(packetHeader.timestampSeconds, 1325709927);
-        assert.equal(packetHeader.timestampMicroseconds, 299312);
-        assert.equal(packetHeader.includedLength, 129);
-        assert.equal(packetHeader.originalLength, 129);
+        assert.equal(packetHeader.timestampSeconds, 1254722767);
+        assert.equal(packetHeader.timestampMicroseconds, 492060);
+        assert.equal(packetHeader.includedLength, 76);
+        assert.equal(packetHeader.originalLength, 76);
       }
     },
 
@@ -49,7 +49,7 @@ vows.describe('pcap-parser').addBatch({
 
       'packet data buffer should not be empty': function(packetData) {
         assert.isNotNull(packetData);
-        assert.equal(packetData.length, 129);
+        assert.equal(packetData.length, 76);
       }
     },
 
@@ -63,11 +63,11 @@ vows.describe('pcap-parser').addBatch({
         assert.isNotNull(packet);
         assert.isDefined(packet.header);
         assert.isDefined(packet.data);
-        assert.equal(packet.header.timestampSeconds, 1325709927);
-        assert.equal(packet.header.timestampMicroseconds, 299312);
-        assert.equal(packet.header.includedLength, 129);
-        assert.equal(packet.header.originalLength, 129);
-        assert.isTrue(packet.data.length > 0);
+        assert.equal(packet.data.length, 76);
+        assert.equal(packet.header.timestampSeconds, 1254722767);
+        assert.equal(packet.header.timestampMicroseconds, 492060);
+        assert.equal(packet.header.includedLength, 76);
+        assert.equal(packet.header.originalLength, 76);
       }
     },
 
@@ -92,14 +92,14 @@ vows.describe('pcap-parser').addBatch({
         parser.parse();
       },
 
-      'it should process 10151 packets': function(count) {
-        assert.equal(count, 10151);
+      'it should process 60 packets': function(count) {
+        assert.equal(count, 60);
       }
     }
   },
 
   'given a path to a pcap file': {
-    topic: new pcapp.Parser(path.join(__dirname, 'test.pcap')),
+    topic: new pcapp.Parser(path.join(__dirname, 'smtp.pcap')),
 
     'the parser should emit all the same events': {
       topic: function(parser) {
