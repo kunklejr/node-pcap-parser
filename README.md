@@ -25,6 +25,7 @@ likely care about. Each event is emitted from the parser created with
 `new pcapp.Parser`. The `pcapp.Parser` constructor can be passed a
 file path or a readable stream.
 
+pcap-parser only parses version 2.4 of the libpcap file format.
 Please see http://wiki.wireshark.org/Development/LibpcapFileFormat for
 detailed documentation of the pcap file format.
 

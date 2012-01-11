@@ -3,7 +3,7 @@
   "description": "Packet capture (PCAP) parser for node",
   "keywords": ["pcap", "parser"],
   "homepage": "https://github.com/nearinfinity/node-pcap-parser",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "engines": { "node" : ">=0.6.0" },
   "maintainers": [
     { "name": "Jeff Kunkle", "email": "jeff.kunkle@nearinfinity.com" },

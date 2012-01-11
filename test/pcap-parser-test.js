@@ -5,16 +5,16 @@ var path = require('path');
 var pcapp = require('../index.js');
 
 vows.describe('pcap-parser').addBatch({
-  'given a bad/malformed pcap file get an error': {
+  'given a bad/malformed pcap file': {
     topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'malformed.pcap'))),
 
     'the parser should emit error event': {
       topic: function(parser) {
-        parser.once('error', this.callback);
+        parser.once('error', this.callback.bind(this, null));
         parser.parse();
       },
 
-      'error should have been called': function(err) {
+      'error should have been emitted': function(err) {
         assert.isNotNull(err);
       }
     }
