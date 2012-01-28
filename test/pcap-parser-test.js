@@ -2,7 +2,7 @@ var vows = require('vows');
 var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
-var pcapp = require('../index.js');
+var pcapp = require('../lib/pcap-parser');
 
 vows.describe('pcap-parser').addBatch({
   'given a bad/malformed pcap file': {
