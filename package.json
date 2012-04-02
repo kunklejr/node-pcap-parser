@@ -3,7 +3,6 @@
   "description": "Packet capture (PCAP) parser for node",
   "author": "Jeff Kunkle <jeff.kunkle@nearinfinity.com>",
   "keywords": ["pcap", "parser"],
-  "homepage": "https://github.com/nearinfinity/node-pcap-parser",
   "version": "0.1.2",
   "engines": { "node" : ">=0.6.0" },
   "maintainers": [
@@ -11,10 +10,8 @@
     { "name": "Joe Ferner", "email": "joe.ferner@nearinfinity.com" }
   ],
   "bugs": { "url": "https://github.com/nearinfinity/node-pcap-parser/issues" },
-  "licenses": [ { "type" : "MIT" } ],
-  "repositories": [
-    { "type": "git", "url": "https://github.com/nearinfinity/node-pcap-parser.git" }
-  ],
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/nearinfinity/node-pcap-parser.git" },
   "devDependencies": {
     "vows": "~0.5.13"
   },
