@@ -6,12 +6,11 @@ var pcapp = require('../lib/pcap-parser');
 
 vows.describe('pcap-parser').addBatch({
   'given a bad/malformed pcap file': {
-    topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'malformed.pcap'))),
+    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'malformed.pcap'))),
 
     'the parser should emit an error event': {
       topic: function(parser) {
         parser.once('error', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'an error event should have been emitted': function(err) {
@@ -21,12 +20,11 @@ vows.describe('pcap-parser').addBatch({
   },
 
   'given a readable stream of a little-endian pcap file': {
-    topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'smtp.pcap'))),
+    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'smtp.pcap'))),
 
     'the parser should emit globalHeader events': {
       topic: function(parser) {
         parser.once('globalHeader', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'global header values should be correct': function(header) {
@@ -44,7 +42,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packetHeader events': {
       topic: function(parser) {
         parser.once('packetHeader', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet header values should be correct': function(packetHeader) {
@@ -59,7 +56,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packetData events': {
       topic: function(parser) {
         parser.once('packetData', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet data buffer should not be empty': function(packetData) {
@@ -71,7 +67,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packet events': {
       topic: function(parser) {
         parser.once('packet', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet values should be correct': function(packet) {
@@ -103,8 +98,6 @@ vows.describe('pcap-parser').addBatch({
         }).on('end', function() {
           this.callback(null, count);
         }.bind(this));
-
-        parser.parse();
       },
 
       'it should process 60 packets': function(count) {
@@ -114,12 +107,11 @@ vows.describe('pcap-parser').addBatch({
   },
 
   'given a readable stream of a big-endian pcap file': {
-    topic: new pcapp.Parser(fs.createReadStream(path.join(__dirname, 'be.pcap'))),
+    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'be.pcap'))),
 
     'the parser should emit globalHeader events': {
       topic: function(parser) {
         parser.once('globalHeader', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'global header values should be correct': function(header) {
@@ -137,7 +129,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packetHeader events': {
       topic: function(parser) {
         parser.once('packetHeader', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet header values should be correct': function(packetHeader) {
@@ -152,7 +143,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packetData events': {
       topic: function(parser) {
         parser.once('packetData', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet data buffer should not be empty': function(packetData) {
@@ -164,7 +154,6 @@ vows.describe('pcap-parser').addBatch({
     'the parser should emit packet events': {
       topic: function(parser) {
         parser.once('packet', this.callback.bind(this, null));
-        parser.parse();
       },
 
       'packet values should be correct': function(packet) {
@@ -196,8 +185,6 @@ vows.describe('pcap-parser').addBatch({
         }).on('end', function() {
           this.callback(null, count);
         }.bind(this));
-
-        parser.parse();
       },
 
       'it should process 5 packets': function(count) {
@@ -207,7 +194,7 @@ vows.describe('pcap-parser').addBatch({
   },
 
   'given a path to a pcap file': {
-    topic: new pcapp.Parser(path.join(__dirname, 'smtp.pcap')),
+    topic: pcapp.parse(path.join(__dirname, 'smtp.pcap')),
 
     'the parser should emit all the same events': {
       topic: function(parser) {
@@ -229,7 +216,6 @@ vows.describe('pcap-parser').addBatch({
         parser.once('packetHeader', ifDone.bind(this, 'packetHeader'));
         parser.once('packetData', ifDone.bind(this, 'packetData'));
         parser.once('packet', ifDone.bind(this, 'packet'));
-        parser.parse();
       },
 
       'all events should have been emitted': function(confirmation) {

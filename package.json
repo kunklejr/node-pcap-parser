@@ -3,7 +3,7 @@
   "description": "Packet capture (PCAP) parser for node",
   "author": "Jeff Kunkle <jeff.kunkle@nearinfinity.com>",
   "keywords": ["pcap", "parser"],
-  "version": "0.1.3",
+  "version": "0.2.0",
   "engines": { "node" : ">=0.6.0" },
   "maintainers": [
     { "name": "Jeff Kunkle", "email": "jeff.kunkle@nearinfinity.com" },
@@ -16,6 +16,6 @@
     "vows": "~0.5.13"
   },
   "scripts": {
-    "test": "vows test/pcap-parser.js"
+    "test": "vows"
   }
 }

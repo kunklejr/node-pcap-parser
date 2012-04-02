@@ -11,23 +11,23 @@ Packet capture (pcap) file parser for Node.js
 ```javascript
 var pcapp = require('pcap-parser');
 
-var parser = new pcapp.Parser('/path/to/file.pcap');
+var parser = pcapp.parse('/path/to/file.pcap');
 parser.on('packet', function(packet) {
   // do your packet processing
 });
-parser.parse(); // to kick things off
 ```
 
 ## Events
 
 pcap-parser emits five different events, only some of which you'll
 likely care about. Each event is emitted from the parser created with
-`new pcapp.Parser`. The `pcapp.Parser` constructor can be passed a
+`pcapp.parse`. The `pcapp.parse` method can be passed a
 file path or a readable stream.
 
-pcap-parser only parses version 2.4 of the libpcap file format.
-Please see http://wiki.wireshark.org/Development/LibpcapFileFormat for
-detailed documentation of the pcap file format.
+pcap-parser only parses version 2.4 of the libpcap file format in big
+or little endian format. Please see
+http://wiki.wireshark.org/Development/LibpcapFileFormat for detailed
+documentation of the pcap file format.
 
 ### globalHeader
 
