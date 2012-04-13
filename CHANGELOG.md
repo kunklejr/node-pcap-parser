@@ -7,3 +7,8 @@ Breaking API:
     returned parser is no longer necessary, or possible. All parsing
     events are emitted on the next tick.
 
+## 0.2.1
+
+Bug:
+
+  - index.js was not updated to reflect the API change in 0.2.0
