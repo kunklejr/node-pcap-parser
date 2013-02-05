@@ -1,226 +1,129 @@
-var vows = require('vows');
-var assert = require('assert');
+'use strict';
+
+//var vows = require('vows');
+//var assert = require('assert');
 var fs = require('fs');
 var path = require('path');
 var pcapp = require('../lib/pcap-parser');
 
-vows.describe('pcap-parser').addBatch({
-  'given a bad/malformed pcap file': {
-    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'malformed.pcap'))),
-
-    'the parser should emit an error event': {
-      topic: function(parser) {
-        parser.once('error', this.callback.bind(this, null));
-      },
-
-      'an error event should have been emitted': function(err) {
-        assert.isNotNull(err);
+module.exports = {
+  'bad/malformed pcap file': function(test) {
+    var parser = pcapp.createParser(fs.createReadStream(path.join(__dirname, 'malformed.pcap')));
+    var errOccured;
+    parser.on('error', function(err) {
+      if (errOccured) {
+        return test.done(new Error('Error called multiple times'));
       }
-    }
+      errOccured = err;
+      test.ok(err);
+    });
+    parser.on('end', function() {
+      test.ok(errOccured);
+      test.done();
+    });
+    parser.resume();
   },
 
-  'given a readable stream of a little-endian pcap file': {
-    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'smtp.pcap'))),
+  'little-endian pcap file': function(test) {
+    var parser = pcapp.createParser(fs.createReadStream(path.join(__dirname, 'smtp.pcap')));
+    var foundGlobalHeader;
+    var packetHeaders = [];
+    var packetDatas = [];
+    var packets = [];
+    parser.on('globalHeader', function(globalHeader) {
+      foundGlobalHeader = globalHeader;
+    });
+    parser.on('packetHeader', function(packetHeader) {
+      packetHeaders.push(packetHeader);
+    });
+    parser.on('packetData', function(packetData) {
+      packetDatas.push(packetData);
+    });
+    parser.on('packet', function(packet) {
+      packets.push(packet);
+    });
+    parser.on('end', function() {
+      test.ok(foundGlobalHeader);
+      test.equals(foundGlobalHeader.magicNumber, 2712847316);
+      test.equals(foundGlobalHeader.majorVersion, 2);
+      test.equals(foundGlobalHeader.minorVersion, 4);
+      test.equals(foundGlobalHeader.gmtOffset, 0);
+      test.equals(foundGlobalHeader.timestampAccuracy, 0);
+      test.equals(foundGlobalHeader.snapshotLength, 65535);
+      test.equals(foundGlobalHeader.linkLayerType, 1);
 
-    'the parser should emit globalHeader events': {
-      topic: function(parser) {
-        parser.once('globalHeader', this.callback.bind(this, null));
-      },
+      test.equals(packetHeaders.length, 60);
+      test.equals(packetHeaders[0].timestampSeconds, 1254722767);
+      test.equals(packetHeaders[0].timestampMicroseconds, 492060);
+      test.equals(packetHeaders[0].capturedLength, 76);
+      test.equals(packetHeaders[0].originalLength, 76);
 
-      'global header values should be correct': function(header) {
-        assert.isNotNull(header);
-        assert.equal(header.magicNumber, 2712847316);
-        assert.equal(header.majorVersion, 2);
-        assert.equal(header.minorVersion, 4);
-        assert.equal(header.gmtOffset, 0);
-        assert.equal(header.timestampAccuracy, 0);
-        assert.equal(header.snapshotLength, 65535);
-        assert.equal(header.linkLayerType, 1);
-      }
-    },
+      test.equals(packetDatas.length, 60);
+      test.equals(packetDatas[0].length, 76);
 
-    'the parser should emit packetHeader events': {
-      topic: function(parser) {
-        parser.once('packetHeader', this.callback.bind(this, null));
-      },
+      test.equals(packets.length, 60);
+      test.ok(packets[0].header);
+      test.ok(packets[0].data);
+      test.equals(packets[0].data.length, 76);
+      test.equals(packets[0].header.timestampSeconds, 1254722767);
+      test.equals(packets[0].header.timestampMicroseconds, 492060);
+      test.equals(packets[0].header.capturedLength, 76);
+      test.equals(packets[0].header.originalLength, 76);
 
-      'packet header values should be correct': function(packetHeader) {
-        assert.isNotNull(packetHeader);
-        assert.equal(packetHeader.timestampSeconds, 1254722767);
-        assert.equal(packetHeader.timestampMicroseconds, 492060);
-        assert.equal(packetHeader.capturedLength, 76);
-        assert.equal(packetHeader.originalLength, 76);
-      }
-    },
-
-    'the parser should emit packetData events': {
-      topic: function(parser) {
-        parser.once('packetData', this.callback.bind(this, null));
-      },
-
-      'packet data buffer should not be empty': function(packetData) {
-        assert.isNotNull(packetData);
-        assert.equal(packetData.length, 76);
-      }
-    },
-
-    'the parser should emit packet events': {
-      topic: function(parser) {
-        parser.once('packet', this.callback.bind(this, null));
-      },
-
-      'packet values should be correct': function(packet) {
-        assert.isNotNull(packet);
-        assert.isDefined(packet.header);
-        assert.isDefined(packet.data);
-        assert.equal(packet.data.length, 76);
-        assert.equal(packet.header.timestampSeconds, 1254722767);
-        assert.equal(packet.header.timestampMicroseconds, 492060);
-        assert.equal(packet.header.capturedLength, 76);
-        assert.equal(packet.header.originalLength, 76);
-      }
-    },
-
-    'the parser should emit an end event when finished': {
-      topic: function(parser) {
-        parser.on('end', this.callback.bind(this, null));
-      },
-
-      'it should occur': function() {}
-    },
-
-    'the parser should parse multiple packets': {
-      topic: function(parser) {
-        var count = 0;
-
-        parser.on('packet', function(packet) {
-          count++;
-        }).on('end', function() {
-          this.callback(null, count);
-        }.bind(this));
-      },
-
-      'it should process 60 packets': function(count) {
-        assert.equal(count, 60);
-      }
-    }
+      test.done();
+    });
+    parser.resume();
   },
 
-  'given a readable stream of a big-endian pcap file': {
-    topic: pcapp.parse(fs.createReadStream(path.join(__dirname, 'be.pcap'))),
+  'big-endian pcap file': function(test) {
+    var parser = pcapp.createParser(fs.createReadStream(path.join(__dirname, 'be.pcap')));
+    var foundGlobalHeader;
+    var packetHeaders = [];
+    var packetDatas = [];
+    var packets = [];
+    parser.on('globalHeader', function(globalHeader) {
+      foundGlobalHeader = globalHeader;
+    });
+    parser.on('packetHeader', function(packetHeader) {
+      packetHeaders.push(packetHeader);
+    });
+    parser.on('packetData', function(packetData) {
+      packetDatas.push(packetData);
+    });
+    parser.on('packet', function(packet) {
+      packets.push(packet);
+    });
+    parser.on('end', function() {
+      test.ok(foundGlobalHeader);
+      test.equals(foundGlobalHeader.magicNumber, 2712847316);
+      test.equals(foundGlobalHeader.majorVersion, 2);
+      test.equals(foundGlobalHeader.minorVersion, 4);
+      test.equals(foundGlobalHeader.gmtOffset, 0);
+      test.equals(foundGlobalHeader.timestampAccuracy, 0);
+      test.equals(foundGlobalHeader.snapshotLength, 9216);
+      test.equals(foundGlobalHeader.linkLayerType, 1);
 
-    'the parser should emit globalHeader events': {
-      topic: function(parser) {
-        parser.once('globalHeader', this.callback.bind(this, null));
-      },
+      test.equals(packetHeaders.length, 5);
+      test.equals(packetHeaders[0].timestampSeconds, 3064);
+      test.equals(packetHeaders[0].timestampMicroseconds, 714590);
+      test.equals(packetHeaders[0].capturedLength, 42);
+      test.equals(packetHeaders[0].originalLength, 60);
 
-      'global header values should be correct': function(header) {
-        assert.isNotNull(header);
-        assert.equal(header.magicNumber, 2712847316);
-        assert.equal(header.majorVersion, 2);
-        assert.equal(header.minorVersion, 4);
-        assert.equal(header.gmtOffset, 0);
-        assert.equal(header.timestampAccuracy, 0);
-        assert.equal(header.snapshotLength, 9216);
-        assert.equal(header.linkLayerType, 1);
-      }
-    },
+      test.equals(packetDatas.length, 5);
+      test.equals(packetDatas[0].length, 42);
 
-    'the parser should emit packetHeader events': {
-      topic: function(parser) {
-        parser.once('packetHeader', this.callback.bind(this, null));
-      },
+      test.equals(packets.length, 5);
+      test.ok(packets[0].header);
+      test.ok(packets[0].data);
+      test.equals(packets[0].data.length, 42);
+      test.equals(packets[0].header.timestampSeconds, 3064);
+      test.equals(packets[0].header.timestampMicroseconds, 714590);
+      test.equals(packets[0].header.capturedLength, 42);
+      test.equals(packets[0].header.originalLength, 60);
 
-      'packet header values should be correct': function(packetHeader) {
-        assert.isNotNull(packetHeader);
-        assert.equal(packetHeader.timestampSeconds, 3064);
-        assert.equal(packetHeader.timestampMicroseconds, 714590);
-        assert.equal(packetHeader.capturedLength, 42);
-        assert.equal(packetHeader.originalLength, 60);
-      }
-    },
-
-    'the parser should emit packetData events': {
-      topic: function(parser) {
-        parser.once('packetData', this.callback.bind(this, null));
-      },
-
-      'packet data buffer should not be empty': function(packetData) {
-        assert.isNotNull(packetData);
-        assert.equal(packetData.length, 42);
-      }
-    },
-
-    'the parser should emit packet events': {
-      topic: function(parser) {
-        parser.once('packet', this.callback.bind(this, null));
-      },
-
-      'packet values should be correct': function(packet) {
-        assert.isNotNull(packet);
-        assert.isDefined(packet.header);
-        assert.isDefined(packet.data);
-        assert.equal(packet.data.length, 42);
-        assert.equal(packet.header.timestampSeconds, 3064);
-        assert.equal(packet.header.timestampMicroseconds, 714590);
-        assert.equal(packet.header.capturedLength, 42);
-        assert.equal(packet.header.originalLength, 60);
-      }
-    },
-
-    'the parser should emit an end event when finished': {
-      topic: function(parser) {
-        parser.on('end', this.callback.bind(this, null));
-      },
-
-      'it should occur': function() {}
-    },
-
-    'the parser should parse multiple packets': {
-      topic: function(parser) {
-        var count = 0;
-
-        parser.on('packet', function(packet) {
-          count++;
-        }).on('end', function() {
-          this.callback(null, count);
-        }.bind(this));
-      },
-
-      'it should process 5 packets': function(count) {
-        assert.equal(count, 5);
-      }
-    }
-  },
-
-  'given a path to a pcap file': {
-    topic: pcapp.parse(path.join(__dirname, 'smtp.pcap')),
-
-    'the parser should emit all the same events': {
-      topic: function(parser) {
-        var events = {
-          globalHeader: false,
-          packetHeader: false,
-          packetData: false,
-          packet: false
-        };
-
-        function ifDone(eventType) {
-          events[eventType] = true;
-          if (events.globalHeader && events.packetHeader && events.packetData && events.packet) {
-            this.callback(null, true);
-          }
-        }
-
-        parser.once('globalHeader', ifDone.bind(this, 'globalHeader'));
-        parser.once('packetHeader', ifDone.bind(this, 'packetHeader'));
-        parser.once('packetData', ifDone.bind(this, 'packetData'));
-        parser.once('packet', ifDone.bind(this, 'packet'));
-      },
-
-      'all events should have been emitted': function(confirmation) {
-        assert.isTrue(confirmation);
-      }
-    }
+      test.done();
+    });
+    parser.resume();
   }
-}).export(module);
+};
+
