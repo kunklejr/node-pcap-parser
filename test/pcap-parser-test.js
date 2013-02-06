@@ -124,6 +124,40 @@ module.exports = {
       test.done();
     });
     parser.resume();
+  },
+
+  'little-endian pcap file using readable interface': function(test) {
+    var parser = pcapp.createParser(fs.createReadStream(path.join(__dirname, 'smtp.pcap')));
+    var packets = [];
+
+    parser.on('readable', function() {
+      if (parser.globalHeader) {
+        test.equals(parser.globalHeader.magicNumber, 2712847316);
+        test.equals(parser.globalHeader.majorVersion, 2);
+        test.equals(parser.globalHeader.minorVersion, 4);
+        test.equals(parser.globalHeader.gmtOffset, 0);
+        test.equals(parser.globalHeader.timestampAccuracy, 0);
+        test.equals(parser.globalHeader.snapshotLength, 65535);
+        test.equals(parser.globalHeader.linkLayerType, 1);
+      }
+
+      var packet;
+      while (packet = parser.read(1)) {
+        packets.push(packet);
+      }
+    });
+    parser.on('end', function() {
+      test.equals(packets.length, 60);
+      test.ok(packets[0].header);
+      test.ok(packets[0].data);
+      test.equals(packets[0].data.length, 76);
+      test.equals(packets[0].header.timestampSeconds, 1254722767);
+      test.equals(packets[0].header.timestampMicroseconds, 492060);
+      test.equals(packets[0].header.capturedLength, 76);
+      test.equals(packets[0].header.originalLength, 76);
+      test.done();
+    });
+    parser.resume();
   }
 };
 
